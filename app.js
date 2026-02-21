@@ -164,18 +164,21 @@ function renderHistoryList(workouts) {
   return workouts.map((w, i) => renderWorkoutCell(w, i, false)).join('');
 }
 
-// ─── WEARABLE LOGIC (Passiva via Bunker) ──────────
+// ─── WEARABLE LOGIC (Supabase Real-Time) ──────────
+const SUPABASE_URL = 'https://cweogtaoetfbttzrmfsk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_WlcKbl-tR-SF7rjZqBFtMQ_wkmQT2eM';
+
 function renderWearableData(wearable) {
-  if (!wearable || !wearable.latest) {
+  if (!wearable) {
     wearableGrid.innerHTML = `
       <div class="wearable-no-data" style="padding: 24px; text-align: center;">
-        <p style="margin-bottom: 12px; font-weight: 500;">Nenhum dado recebido do Bunker.</p>
+        <p style="margin-bottom: 12px; font-weight: 500;">Banco de Dados Vazio.</p>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-          O seu Bunker local é o único com permissão para ler seu Smartwatch.<br>
-          Gere uma sincronização lá primeiro.
+          O seu Bunker local ainda não enviou nenhum dado de pulso para este novo Supabase.<br>
+          Gere uma sincronização no app local primeiro.
         </p>
         <button class="pill pill-goal" onclick="forceSyncWearable()" style="cursor: pointer; padding: 10px 20px; font-size: 13px;">
-          � Tentar Novamente
+          🔄 Tentar Novamente
         </button>
       </div>`;
     wearableSection.style.display = 'block';
@@ -187,7 +190,7 @@ function renderWearableData(wearable) {
     return;
   }
 
-  const w = wearable.latest;
+  const w = wearable;
   wearableSyncTime.innerHTML = `
     Sincronizado hoje, ${formatTime(w.synced_at)}
     <button class="pill pill-goal" onclick="forceSyncWearable()" style="margin-left: 10px; cursor: pointer; background: transparent; padding: 4px 8px;">🔄 Atualizar</button>
@@ -245,25 +248,33 @@ function renderWearableData(wearable) {
   `).join('');
 
   wearableSection.style.display = 'block';
-}
-
-function connectWearable() {
-  alert('⚠️ Permissão Negada no Google Cloud.\nPara sua segurança, apenas o Bunker local tem a autorização OAuth para buscar seus batimentos.\nO Bunker fará o upload dos seus dados reais pra cá em segundo plano.');
+  wearableSection.style.display = 'block';
 }
 
 async function forceSyncWearable() {
-  wearableSyncTime.innerHTML = `<span style="color:var(--accent)">⏳ Atualizando dados...</span>`;
+  wearableSyncTime.innerHTML = `<span style="color:var(--accent)">⏳ Consultando Supabase Live...</span>`;
 
   try {
-    const res = await fetch(`${WEARABLE_URL}?t=${Date.now()}`);
+    const query = `${SUPABASE_URL}/rest/v1/wearable_sync?select=*&order=synced_at.desc&limit=1`;
+    const res = await fetch(query, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+
     if (res.ok) {
       const data = await res.json();
-      renderWearableData(data);
+      if (data && data.length > 0) {
+        renderWearableData(data[0]);
+      } else {
+        renderWearableData(null);
+      }
     } else {
-      throw new Error('Falha HTTP');
+      throw new Error(`Falha HTTP Supabase: ${res.status}`);
     }
   } catch (e) {
-    alert('Erro ao buscar wearable.json: ' + e);
+    alert('Erro ao buscar wearable do Supabase: ' + e);
     wearableSyncTime.innerHTML = `Falha na sincronização`;
   }
 }
@@ -273,7 +284,12 @@ async function init() {
   try {
     const [resTreinos, resWearable] = await Promise.allSettled([
       fetch(`${DATA_URL}?t=${Date.now()}`),
-      fetch(`${WEARABLE_URL}?t=${Date.now()}`)
+      fetch(`${SUPABASE_URL}/rest/v1/wearable_sync?select=*&order=synced_at.desc&limit=1`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      })
     ]);
 
     // Handle treinos
@@ -317,12 +333,16 @@ async function init() {
       throw new Error("Erro de rede nas APIs");
     }
 
-    // Handle wearable fallback
+    // Handle wearable Supabase
     if (resWearable.status === 'fulfilled' && resWearable.value.ok) {
       const wearData = await resWearable.value.json();
-      renderWearableData(wearData);
+      if (wearData && wearData.length > 0) {
+        renderWearableData(wearData[0]);
+      } else {
+        renderWearableData(null);
+      }
     } else {
-      renderWearableData(null); // Render no-data connect button
+      renderWearableData(null);
     }
 
   } catch (err) {
