@@ -164,18 +164,18 @@ function renderHistoryList(workouts) {
   return workouts.map((w, i) => renderWorkoutCell(w, i, false)).join('');
 }
 
-// ─── WEARABLE & OAUTH LOGIC (Conexão Direta Vercel -> App Smartwatch) ──────────
-const GOOGLE_CLIENT_ID = ''; // Precisa ser preenchido pelo usuário
-const REDIRECT_URI = 'https://bunker-workout-tracker.vercel.app';
-const SCOPES = 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.body.read https://www.googleapis.com/auth/fitness.heart_rate.read https://www.googleapis.com/auth/fitness.sleep.read';
-
+// ─── WEARABLE LOGIC (Passiva via Bunker) ──────────
 function renderWearableData(wearable) {
   if (!wearable || !wearable.latest) {
     wearableGrid.innerHTML = `
       <div class="wearable-no-data" style="padding: 24px; text-align: center;">
-        <p style="margin-bottom: 12px;">App desconectado.</p>
-        <button class="pill pill-goal" onclick="connectWearable()" style="cursor: pointer; padding: 10px 20px; font-size: 13px;">
-          🔗 Conectar Google Fit
+        <p style="margin-bottom: 12px; font-weight: 500;">Nenhum dado recebido do Bunker.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          O seu Bunker local é o único com permissão para ler seu Smartwatch.<br>
+          Gere uma sincronização lá primeiro.
+        </p>
+        <button class="pill pill-goal" onclick="forceSyncWearable()" style="cursor: pointer; padding: 10px 20px; font-size: 13px;">
+          � Tentar Novamente
         </button>
       </div>`;
     wearableSection.style.display = 'block';
@@ -248,46 +248,23 @@ function renderWearableData(wearable) {
 }
 
 function connectWearable() {
-  if (!GOOGLE_CLIENT_ID) {
-    alert('⚠️ Google Client ID ausente no app.js.\nPor favor, configure o Client ID no código da Vercel para permitir que este site leia os dados do seu Smartwatch.');
-    return;
-  }
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(SCOPES)}`;
-  window.location.href = authUrl;
+  alert('⚠️ Permissão Negada no Google Cloud.\nPara sua segurança, apenas o Bunker local tem a autorização OAuth para buscar seus batimentos.\nO Bunker fará o upload dos seus dados reais pra cá em segundo plano.');
 }
 
 async function forceSyncWearable() {
-  const hash = window.location.hash;
-  let token = localStorage.getItem('gfit_token');
-
-  // Se voltamos do OAuth com token na URL
-  if (hash && hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.substring(1));
-    token = params.get('access_token');
-    localStorage.setItem('gfit_token', token);
-    // Limpar URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
-  if (!token) {
-    connectWearable();
-    return;
-  }
-
-  wearableSyncTime.innerHTML = `<span style="color:var(--accent)">⏳ Puxando dados do App...</span>`;
+  wearableSyncTime.innerHTML = `<span style="color:var(--accent)">⏳ Atualizando dados...</span>`;
 
   try {
-    // Exemplo: Puxar passos do Google Fit Aggregation (Simulado aqui por questões de brevidade da API raw)
-    // Isso pode ser expandido com requests fetch reais para www.googleapis.com/fitness/v1/...
-
-    // Simulação de Sucesso p/ MVP e Entrega no Bunker
-    setTimeout(() => {
-      alert('🛠️ Conexão Vercel + Google Auth Validada!\n(Os requests agregados ao Google Fit estão prontos para envio ao Supabase).');
-      wearableSyncTime.textContent = `Sincronizado hoje, ${formatTime(new Date().toISOString())}`;
-    }, 1500);
-
+    const res = await fetch(`${WEARABLE_URL}?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      renderWearableData(data);
+    } else {
+      throw new Error('Falha HTTP');
+    }
   } catch (e) {
-    alert('Erro ao puxar dados do Smartwatch: ' + e);
+    alert('Erro ao buscar wearable.json: ' + e);
+    wearableSyncTime.innerHTML = `Falha na sincronização`;
   }
 }
 
@@ -340,12 +317,8 @@ async function init() {
       throw new Error("Erro de rede nas APIs");
     }
 
-    // Handle wearable fallback se não tiver token no browser
-    const tokenParams = new URLSearchParams(window.location.hash.substring(1));
-    if (tokenParams.get('access_token')) {
-      // Acabou de autorizar, forçar refresh sem ler do JSON local antigo
-      forceSyncWearable();
-    } else if (resWearable.status === 'fulfilled' && resWearable.value.ok) {
+    // Handle wearable fallback
+    if (resWearable.status === 'fulfilled' && resWearable.value.ok) {
       const wearData = await resWearable.value.json();
       renderWearableData(wearData);
     } else {
