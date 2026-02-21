@@ -1,5 +1,95 @@
 {
-  "workouts": [],
-  "last_updated": null,
-  "total_sessions": 0
+  "workouts": [
+    {
+      "workout": {
+        "title": "Circuito Queima de Gordura Intermediário - Home Edition",
+        "overview": "Treino focado em alta densidade e recrutamento de grandes grupos musculares para maximizar o gasto calórico e o efeito EPOC, utilizando apenas o peso do corpo.",
+        "estimated_calories": 320,
+        "results_projection": "Com consistência de 4x por semana e dieta equilibrada, espere perda de 2 a 4kg e melhora na definição muscular em 4 a 6 semanas.",
+        "warmup": [
+          {
+            "exercise": "Polichinelos",
+            "duration": "2 min",
+            "instruction": "Mantenha um ritmo constante para elevar a frequência cardíaca."
+          },
+          {
+            "exercise": "Mobilidade de Quadril",
+            "duration": "1.5 min",
+            "instruction": "Agachamento profundo segurando as pontas dos pés."
+          },
+          {
+            "exercise": "Rotação de Braços",
+            "duration": "1.5 min",
+            "instruction": "Círculos amplos para frente e para trás para aquecer os ombros."
+          }
+        ],
+        "main_block": [
+          {
+            "exercise": "Burpees",
+            "sets": "3",
+            "reps": "12",
+            "rest": "45s",
+            "instruction": "Peito no chão, salto explosivo ao subir. Mantenha o core contraído.",
+            "youtube_keyword": "burpee tutorial",
+            "calories_per_set": 18
+          },
+          {
+            "exercise": "Agachamento Sumô",
+            "sets": "3",
+            "reps": "20",
+            "rest": "45s",
+            "instruction": "Pés afastados além da largura dos ombros, pontas para fora.",
+            "youtube_keyword": "sumo squat bodyweight",
+            "calories_per_set": 15
+          },
+          {
+            "exercise": "Flexão de Braços (Push-ups)",
+            "sets": "3",
+            "reps": "15",
+            "rest": "45s",
+            "instruction": "Mantenha o corpo alinhado, sem deixar o quadril cair.",
+            "youtube_keyword": "push up technique",
+            "calories_per_set": 12
+          },
+          {
+            "exercise": "Afundo Alternado",
+            "sets": "3",
+            "reps": "20 (total)",
+            "rest": "45s",
+            "instruction": "Dê um passo atrás e desça até o joelho quase tocar o chão.",
+            "youtube_keyword": "reverse lunges tutorial",
+            "calories_per_set": 14
+          },
+          {
+            "exercise": "Mountain Climbers",
+            "sets": "3",
+            "reps": "40s",
+            "rest": "45s",
+            "instruction": "Posição de prancha, traga os joelhos em direção ao peito rapidamente.",
+            "youtube_keyword": "mountain climbers exercise",
+            "calories_per_set": 16
+          }
+        ],
+        "finisher": [
+          {
+            "exercise": "Prancha Abdominal (Plank)",
+            "duration": "60s",
+            "instruction": "Corpo reto, antebraços no chão, contraia glúteos e abdômen."
+          },
+          {
+            "exercise": "Salto em Tesoura (Power Jacks)",
+            "duration": "60s",
+            "instruction": "Intensidade máxima para finalizar o gasto calórico."
+          }
+        ],
+        "recovery": "Alongamento estático focado em quadríceps, posterior de coxa e peitorais (30s cada posição)."
+      },
+      "goal": "emagrecimento",
+      "duration": 30,
+      "level": "intermediario",
+      "saved_at": "2026-02-21T17:16:31.418312Z"
+    }
+  ],
+  "last_updated": "2026-02-21T17:16:31.418312Z",
+  "total_sessions": 1
 }
