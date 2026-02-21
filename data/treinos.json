@@ -88,8 +88,20 @@
       "duration": 30,
       "level": "intermediario",
       "saved_at": "2026-02-21T17:16:31.418312Z"
+    },
+    {
+      "workout": {
+        "title": "Teste Manual",
+        "overview": "Teste",
+        "estimated_calories": 200,
+        "main_block": []
+      },
+      "goal": "hipertrofia",
+      "duration": 45,
+      "level": "avancado",
+      "saved_at": "2026-02-21T17:20:53.683477Z"
     }
   ],
-  "last_updated": "2026-02-21T17:16:31.418312Z",
-  "total_sessions": 1
+  "last_updated": "2026-02-21T17:20:53.683477Z",
+  "total_sessions": 2
 }
