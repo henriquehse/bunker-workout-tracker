@@ -1,0 +1,24 @@
+{
+  "name": "bunker-workout-tracker",
+  "version": "1.0.0",
+  "description": "Mini site estático (HTML5/CSS3/JS puro) que exibe os treinos gerados pelo Bunker. Hospedado no Vercel, atualizado automaticamente via push do Bunker.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henriquehse/bunker-workout-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/henriquehse/bunker-workout-tracker/issues"
+  },
+  "homepage": "https://github.com/henriquehse/bunker-workout-tracker#readme",
+  "dependencies": {
+    "youtube-search-api": "^2.0.1"
+  }
+}

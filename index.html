@@ -101,6 +101,30 @@
     <p>🏰 Bunker Workout Tracker — Atualizado automaticamente pelo Bunker</p>
   </footer>
 
+  <!-- Modal do Vídeo YouTube (Estilo Bunker) -->
+  <div id="video-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Vídeo</h3>
+        <button id="modal-close-btn" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="video-loader" class="video-loader">Carregando vídeo...</div>
+        <iframe id="video-iframe" src="" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      </div>
+      <div class="modal-footer">
+        <span id="video-duration" class="video-duration">--:--</span>
+        <a id="video-external-link" href="#" target="_blank" class="video-external-link">Abrir no YouTube <svg
+            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg></a>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 

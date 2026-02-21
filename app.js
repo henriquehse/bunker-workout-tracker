@@ -82,27 +82,18 @@ function renderExercises(exercises, label) {
     const cal = ex.calories_per_set ? ` · ~${ex.calories_per_set} kcal/série` : '';
     const instruction = ex.instruction || '';
 
-    // YOUTUBE EMBED TRICK (Busca e toca o primeiro vídeo direto do iframe)
-    const ytQuery = encodeURIComponent(ex.exercise + " execução correta academia");
-    const ytEmbed = `
-      <div class="exercise-video-wrap">
-        <iframe width="100%" height="200" src="https://www.youtube.com/embed?listType=search&list=${ytQuery}" frameborder="0" allowfullscreen></iframe>
-      </div>
-    `;
-
     return `
       <div class="exercise-item" style="animation-delay:${i * 0.06}s">
-        <div class="exercise-header" onclick="toggleExercise(this.parentElement)">
-          <div>
+        <div class="exercise-header">
+          <div class="exercise-info">
             <div class="exercise-name">${ex.exercise}</div>
             <div class="exercise-detail">${repsStr}${rest}${cal}</div>
           </div>
-          <span class="exercise-chevron">▼</span>
+          <button class="exercise-play-btn" onclick="openVideoModal('${encodeURIComponent(ex.exercise)}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          </button>
         </div>
-        <div class="exercise-body">
-          ${instruction ? `<div class="exercise-instruction">${instruction}</div>` : ''}
-          ${ytEmbed}
-        </div>
+        ${instruction ? `<div class="exercise-body"><div class="exercise-instruction">${instruction}</div></div>` : ''}
       </div>`;
   }).join('');
 
@@ -302,8 +293,63 @@ async function init() {
   }
 }
 
+// ─── VIDEO MODAL LOGIC ────────────────────────────────────────────────────────
+const modal = document.getElementById('video-modal');
+const modalTitle = document.getElementById('modal-title');
+const iframe = document.getElementById('video-iframe');
+const loader = document.getElementById('video-loader');
+const closeBtn = document.getElementById('modal-close-btn');
+const extLink = document.getElementById('video-external-link');
+const durationEl = document.getElementById('video-duration');
+
+async function openVideoModal(exerciseNameEnc) {
+  const exerciseName = decodeURIComponent(exerciseNameEnc);
+  modalTitle.textContent = exerciseName;
+  iframe.src = '';
+  iframe.style.display = 'none';
+  loader.style.display = 'flex';
+  loader.textContent = 'Carregando vídeo...';
+  extLink.href = '#';
+  durationEl.textContent = '--:--';
+  modal.classList.add('active');
+
+  try {
+    const response = await fetch(`/api/youtube?query=${exerciseNameEnc}`);
+    if (!response.ok) throw new Error('Falha ao buscar vídeo');
+
+    const data = await response.json();
+    if (data.id) {
+      iframe.src = `https://www.youtube.com/embed/${data.id}?autoplay=1`;
+      iframe.style.display = 'block';
+      extLink.href = `https://www.youtube.com/watch?v=${data.id}`;
+      durationEl.textContent = data.duration ? `Duração: ${data.duration}` : '';
+      loader.style.display = 'none';
+    } else {
+      throw new Error('Vídeo não encontrado');
+    }
+  } catch (error) {
+    console.error(error);
+    loader.textContent = 'Vídeo não encontrado.';
+    extLink.href = `https://www.youtube.com/results?search_query=${exerciseNameEnc}+execução+correta+academia`;
+    extLink.textContent = 'Pesquisar no YouTube';
+  }
+}
+
+closeBtn.addEventListener('click', () => {
+  modal.classList.remove('active');
+  iframe.src = ''; // stop video playback
+});
+
+// Close modal when clicking on background overlay
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    modal.classList.remove('active');
+    iframe.src = '';
+  }
+});
+
 // ─── EXPOSE globals to inline onclick ────────────────────────────────────────
-window.toggleExercise = toggleExercise;
+window.openVideoModal = openVideoModal;
 window.toggleWorkout = toggleWorkout;
 
 init();
