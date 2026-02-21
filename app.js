@@ -29,7 +29,16 @@ function formatTime(iso) {
 function fmtDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function formatDayCell(iso) {
+  if (!iso) return 'Treino sem data';
+  const d = new Date(iso);
+  const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const diaSemana = dias[d.getDay()];
+  const data = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return `${diaSemana} - ${data}`;
 }
 
 function calcStreak(workouts) {
@@ -73,16 +82,27 @@ function renderExercises(exercises, label) {
     const cal = ex.calories_per_set ? ` · ~${ex.calories_per_set} kcal/série` : '';
     const instruction = ex.instruction || '';
 
+    // YOUTUBE EMBED TRICK (Busca e toca o primeiro vídeo direto do iframe)
+    const ytQuery = encodeURIComponent(ex.exercise + " execução correta academia");
+    const ytEmbed = `
+      <div class="exercise-video-wrap">
+        <iframe width="100%" height="200" src="https://www.youtube.com/embed?listType=search&list=${ytQuery}" frameborder="0" allowfullscreen></iframe>
+      </div>
+    `;
+
     return `
-      <div class="exercise-item" onclick="toggleExercise(this)" style="animation-delay:${i * 0.06}s">
-        <div class="exercise-header">
+      <div class="exercise-item" style="animation-delay:${i * 0.06}s">
+        <div class="exercise-header" onclick="toggleExercise(this.parentElement)">
           <div>
             <div class="exercise-name">${ex.exercise}</div>
             <div class="exercise-detail">${repsStr}${rest}${cal}</div>
           </div>
           <span class="exercise-chevron">▼</span>
         </div>
-        ${instruction ? `<div class="exercise-instruction">${instruction}</div>` : ''}
+        <div class="exercise-body">
+          ${instruction ? `<div class="exercise-instruction">${instruction}</div>` : ''}
+          ${ytEmbed}
+        </div>
       </div>`;
   }).join('');
 
@@ -97,15 +117,15 @@ function toggleExercise(el) {
   el.classList.toggle('expanded');
 }
 
-// ─── RENDER WORKOUT CARD ──────────────────────────────────────────────────────
-function renderWorkoutCard(w, compact = false) {
+// ─── RENDER WORKOUT CARD (CÉLULA) ───────────────────────────────────────────
+function renderWorkoutCell(w, index, isLatest = false) {
   const workout = w.workout || w;
   const title = workout.title || 'Treino';
   const goal = w.goal || workout.goal || '';
   const dur = w.duration || workout.duration || '';
   const cal = workout.estimated_calories || '';
   const level = w.level || workout.level || '';
-  const date = fmtDate(w.saved_at);
+  const cellDate = formatDayCell(w.saved_at);
   const overview = workout.overview || '';
 
   const main = workout.main_block || [];
@@ -119,42 +139,38 @@ function renderWorkoutCard(w, compact = false) {
     level ? `<span class="pill pill-level">${level}</span>` : '',
   ].filter(Boolean).join('');
 
+  // Se for o último treino (mais recente), ele já vem expandido por padrão
+  const expandedClass = isLatest ? 'expanded' : '';
+
   return `
-    <div class="workout-card">
-      <div class="workout-card-header">
-        <div>
-          <div class="workout-title">${title}</div>
-          <div class="workout-meta">${pills}</div>
+    <div class="workout-cell ${expandedClass}" style="animation-delay:${index * 0.05}s">
+      <div class="workout-cell-header" onclick="toggleWorkout(this.parentElement)">
+        <div class="cell-info">
+          <div class="cell-date">📅 ${cellDate}</div>
+          <div class="cell-title">${title}</div>
+          <div class="cell-pills">${pills}</div>
         </div>
-        <div class="workout-date">${date}</div>
+        <div class="cell-action">
+          <span class="workout-chevron">▼</span>
+        </div>
       </div>
-      ${overview ? `<div class="workout-overview">${overview}</div>` : ''}
-      ${renderExercises(warmup, '🔥 Aquecimento')}
-      ${renderExercises(main, '💪 Treino Principal')}
-      ${renderExercises(finisher, '⚡ Finisher')}
+      <div class="workout-cell-content">
+        ${overview ? `<div class="workout-overview">${overview}</div>` : ''}
+        ${renderExercises(warmup, '🔥 Aquecimento')}
+        ${renderExercises(main, '💪 Treino Principal')}
+        ${renderExercises(finisher, '⚡ Finisher')}
+      </div>
     </div>`;
 }
 
-// ─── RENDER HISTORY ITEM ──────────────────────────────────────────────────────
-function renderHistoryItem(w, index) {
-  const workout = w.workout || w;
-  const title = workout.title || 'Treino';
-  const goal = w.goal || workout.goal || '';
-  const dur = w.duration || workout.duration || '';
-  const cal = workout.estimated_calories || '';
-  const date = fmtDate(w.saved_at);
+function toggleWorkout(el) {
+  el.classList.toggle('expanded');
+}
 
-  return `
-    <div class="history-item" style="animation-delay:${index * 0.06}s">
-      <div>
-        <div class="history-title">${title}</div>
-        <div class="history-date">${date} · ${goal} · ${dur} min</div>
-      </div>
-      <div class="history-right">
-        ${cal ? `<div class="history-cal">${cal} kcal</div>` : ''}
-        <span class="pill pill-goal" style="margin: 0;">${goal || '—'}</span>
-      </div>
-    </div>`;
+// ─── RENDER HISTORY LIST ────────────────────────────────────────────────────
+function renderHistoryList(workouts) {
+  if (!workouts || workouts.length === 0) return '';
+  return workouts.map((w, i) => renderWorkoutCell(w, i, false)).join('');
 }
 
 // ─── RENDER WEARABLE DATA ─────────────────────────────────────────────────────
@@ -259,12 +275,12 @@ async function init() {
               <span class="header-badge">🔥 ${streak} dias</span>
               <span class="header-badge">📋 ${workouts.length} treinos</span>`;
 
-        // ── Latest ──
-        $('latest-workout').innerHTML = renderWorkoutCard(workouts[0]);
+        // ── Render Cells (1st is expanded) ──
+        $('latest-workout').innerHTML = renderWorkoutCell(workouts[0], 0, true);
 
-        // ── History (skip latest) ──
+        // ── Rest of History Cells ──
         if (workouts.length > 1) {
-          $('history-list').innerHTML = workouts.slice(1).map(renderHistoryItem).join('');
+          $('history-list').innerHTML = renderHistoryList(workouts.slice(1));
         }
       }
     } else {
@@ -286,7 +302,8 @@ async function init() {
   }
 }
 
-// ─── EXPOSE toggle to inline onclick ─────────────────────────────────────────
+// ─── EXPOSE globals to inline onclick ────────────────────────────────────────
 window.toggleExercise = toggleExercise;
+window.toggleWorkout = toggleWorkout;
 
 init();

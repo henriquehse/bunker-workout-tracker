@@ -218,87 +218,90 @@ body {
   font-size: 18px;
 }
 
-/* ─── WORKOUT CARD (Latest) ──────────────── */
-.workout-card {
+/* ─── WORKOUT CELL (Collapsible) ───────────── */
+.workout-cell {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  margin-bottom: 16px;
   overflow: hidden;
-  animation: fadeUp 0.45s ease both;
-  box-shadow: var(--shadow);
+  animation: fadeUp 0.4s ease both;
+  transition: border-color 0.2s;
 }
 
-.workout-card-header {
-  background: linear-gradient(135deg, rgba(0, 229, 160, 0.08), rgba(0, 178, 255, 0.08));
-  border-bottom: 1px solid var(--border);
+.workout-cell:hover {
+  border-color: rgba(0, 229, 160, 0.25);
+}
+
+.workout-cell-header {
   padding: 20px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(0, 229, 160, 0.05), rgba(0, 178, 255, 0.03));
 }
 
-.workout-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 4px;
-}
-
-.workout-meta {
+.cell-info {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
 }
 
-.pill {
-  padding: 3px 10px;
-  border-radius: 20px;
+.cell-date {
   font-size: 11px;
-  font-weight: 600;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
-.pill-goal {
-  background: rgba(0, 229, 160, 0.12);
-  color: var(--accent);
-  border: 1px solid rgba(0, 229, 160, 0.2);
+.cell-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.pill-dur {
-  background: rgba(0, 178, 255, 0.12);
-  color: var(--accent2);
-  border: 1px solid rgba(0, 178, 255, 0.2);
+.cell-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.pill-cal {
-  background: rgba(251, 191, 36, 0.12);
-  color: var(--warn);
-  border: 1px solid rgba(251, 191, 36, 0.2);
+.cell-action {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
 }
 
-.pill-level {
-  background: rgba(255, 77, 109, 0.12);
-  color: var(--danger);
-  border: 1px solid rgba(255, 77, 109, 0.2);
+.workout-cell-header:hover .cell-action {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.workout-date {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.workout-overview {
-  padding: 16px 20px;
+.workout-chevron {
   font-size: 14px;
-  color: #9ca3af;
-  border-bottom: 1px solid var(--border);
-  line-height: 1.7;
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+}
+
+.workout-cell.expanded .workout-chevron {
+  transform: rotate(180deg);
+  color: #fff;
+}
+
+.workout-cell-content {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+
+.workout-cell.expanded .workout-cell-content {
+  display: block;
 }
 
 /* ─── EXERCISES ──────────────────────────── */
@@ -316,71 +319,74 @@ body {
 }
 
 .exercise-item {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: border-color 0.2s, transform 0.15s;
+  border-bottom: 1px solid var(--border);
   animation: fadeUp 0.4s ease both;
 }
 
-.exercise-item:hover {
-  border-color: rgba(0, 229, 160, 0.25);
-  transform: translateX(3px);
+.exercise-item:last-child {
+  border-bottom: none;
 }
 
 .exercise-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.exercise-header:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .exercise-name {
   font-weight: 600;
-  font-size: 14px;
   color: var(--text);
-}
-
-.exercise-reps {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--accent);
-  white-space: nowrap;
-  flex-shrink: 0;
+  margin-bottom: 4px;
 }
 
 .exercise-detail {
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: 4px;
 }
 
-.exercise-instruction {
+.exercise-body {
   display: none;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
-  color: #9ca3af;
-  line-height: 1.6;
+  background: var(--surface2);
+  padding: 0 20px 20px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-.exercise-item.expanded .exercise-instruction {
+.exercise-item.expanded .exercise-body {
   display: block;
 }
 
+.exercise-instruction {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  padding-top: 10px;
+}
+
+.exercise-video-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
 .exercise-chevron {
-  transition: transform 0.2s;
+  transition: transform 0.3s;
   color: var(--text-muted);
   font-size: 12px;
 }
 
 .exercise-item.expanded .exercise-chevron {
   transform: rotate(180deg);
+  color: #fff;
 }
 
 /* ─── HISTORY ────────────────────────────── */
@@ -388,45 +394,6 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  animation: fadeUp 0.4s ease both;
-}
-
-.history-item:hover {
-  border-color: rgba(0, 229, 160, 0.2);
-  background: var(--surface2);
-}
-
-.history-title {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.history-date {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.history-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.history-cal {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
   color: var(--warn);
 }
 
