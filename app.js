@@ -410,7 +410,6 @@ modal.addEventListener('click', (e) => {
 // ─── EXPOSE globals to inline onclick ────────────────────────────────────────
 window.openVideoModal = openVideoModal;
 window.toggleWorkout = toggleWorkout;
-window.connectWearable = connectWearable;
 window.forceSyncWearable = forceSyncWearable;
 
 init();
